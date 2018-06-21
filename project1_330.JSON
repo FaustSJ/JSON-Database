@@ -1,0 +1,270 @@
+jsoniq version "1.0";
+
+(: -------  the data --------------- :)
+
+declare variable $root:= { db : [
+	{ table : "departments",
+	  tuples : [
+		{ dcode: "CS",  dname: "computer_science", chair : "106"},
+		{ dcode: "PHY", dname: "physics", chair: "103"},
+		{ dcode: "PSY", dname: "psychology", chair: "104"},
+		{ dcode: "BIS", dname: "business", chair: "109"},
+		{ dcode: "HIST",dname: "history",chair: "110"}
+	]},
+	{ table : "courses",
+	   tuples : [
+		{  dcode: "CS", cno: 330, title: "Formal Methods", units: 3 },
+		{  dcode: "CS", cno: 302, title: "Database Management", units: 3 },
+		{  dcode: "PSY", cno: 403, title: "Vacation in Hawaii", units: 6 },
+		{  dcode: "BIS", cno: 404, title: "Sucesses and Failures of Rapture", units: 2 },
+		{  dcode: "HIST", cno: 505, title: "What They Didnt Tell You", units: 4},
+		{  dcode: "PHY", cno: 506, title: "Paradoxes and How to Avoid Them", units: 5},
+		{  dcode: "BIS", cno: 405, title: "Financials for Superheros", units: 2}
+	]},
+	{ table: "prereqs",
+	   tuples: [
+		{  dcode: "CS", cno: 302, pcode: "CS", pno: 330 },
+		{  dcode: "CS", cno: 302, pcode: "HIST", pno: 505 },
+		{  dcode: "CS", cno: 302, pcode: "BIS", pno: 404},
+		{  dcode: "CS", cno: 330, pcode: "PSY", pno: 403 },
+		{  dcode: "CS", cno: 330, pcode: "PHY", pno: 506 },
+		{  dcode: "BIS", cno: 405, pcode: "BIS", pno: 404 }
+	]},
+	{  table: "classes",
+	    tuples : [
+		{  class : 21, dcode : "CS", cno: 330, instructor: 100 },
+		{  class : 22, dcode : "CS", cno: 330, instructor: 101 },
+		{  class : 23, dcode : "CS", cno: 302, instructor: 100 },
+		{  class : 24, dcode : "PSY", cno: 403, instructor: 103 },
+		{  class : 25, dcode : "PHY", cno: 506, instructor: 108 },
+		{  class : 26, dcode : "BIS", cno: 404, instructor: 105 },
+		{  class : 27, dcode : "HIST", cno: 505, instructor: 110 }
+	]},
+	{ table: "faculty",
+	   tuples: [
+		{ ssn: 100, name: "Smith", dcode: "CS", rank: "assistant_professor" },
+		{ ssn: 102, name: "Johnson", dcode: "CS", rank: "professor" },
+		{ ssn: 103, name: "Doctor", dcode: "PHY", rank: "chair" },
+		{ ssn: 104, name: "Hannibal", dcode: "PSY", rank: "chair" },
+		{ ssn: 105, name: "Ryan", dcode: "BIS", rank: "professor" },
+		{ ssn: 106, name: "Celestia", dcode: "CS", rank: "chair" },
+		{ ssn: 107, name: "Luna", dcode: "PSY", rank: "assistant_professor" },
+		{ ssn: 108, name: "Noble", dcode: "PHY", rank: "professor"},
+		{ ssn: 109, name: "Pots", dcode: "BIS", rank: "chair"},
+		{ ssn: 110, name: "Song", dcode: "HIST", rank: "chair"}
+	]},
+	{ table: "students",
+	   tuples: [
+		{ ssn: 200, name: "Jade", major: "CS", status: "active" },
+		{ ssn: 201, name: "Dave", major: "CS", status: "active" },
+		{ ssn: 202, name: "Dirk", major: "BIS", status: "active" },
+		{ ssn: 203, name: "Roxy", major: "CS", status: "active" },
+		{ ssn: 204, name: "John", major: "CS", status: "active" },
+		{ ssn: 205, name: "Rose", major: "PSY", status: "active" }
+	]},
+	{  table: "enrollments",
+	   tuples: [
+		{ class: 21, ssn: 200 },
+		{ class: 21, ssn: 201 },
+		{ class: 21, ssn: 205 },
+		{ class: 25, ssn: 203 },
+		{ class: 22, ssn: 202 },
+		{ class: 22, ssn: 204 },
+		{ class: 23, ssn: 201 },
+		{ class: 24, ssn: 205 },
+		{ class: 27, ssn: 203 }
+	]},
+	{ table: "transcripts",
+	   tuples: [
+		{ ssn: 200, dcode: "CS", cno: 330, grade: "A" },
+		{ ssn: 200, dcode: "PHY", cno: 506, grade: "B" },
+		{ ssn: 201, dcode: "HIST", cno: 505, grade: "A" },
+		{ ssn: 201, dcode: "PSY", cno: 403, grade: "A" },
+		{ ssn: 201, dcode: "PHY", cno: 506, grade: "A" },
+		{ ssn: 202, dcode: "CS", cno: 302, grade: "B" },
+		{ ssn: 203, dcode: "PHY", cno: 506, grade: "F"},
+		{ ssn: 203, dcode: "HIST", cno: 505, grade: "D"},
+		{ ssn: 204, dcode: "HIST", cno: 505, grade: "A"},
+		{ ssn: 204, dcode: "CS", cno: 505, grade: "C"},
+		{ ssn: 205, dcode: "PHY", cno: 506, grade: "B"}
+	]}
+]};
+
+(: ------ below are some structures for convenience ---------:)
+
+declare variable $departments := $root.db[][$$.table = "departments"].tuples[];
+declare variable $courses := $root.db[][$$.table = "courses"].tuples[];
+declare variable $prereqs := $root.db[][$$.table = "prereqs"].tuples[];
+declare variable $classes := $root.db[][$$.table = "classes"].tuples[];
+declare variable $faculty := $root.db[][$$.table = "faculty"].tuples[];
+declare variable $students := $root.db[][$$.table = "students"].tuples[];
+declare variable $enrollments := $root.db[][$$.table = "enrollments"].tuples[];
+declare variable $transcripts := $root.db[][$$.table = "transcripts"].tuples[];
+
+declare variable $dcodes := $departments.dcode;
+declare variable $facultySsns := $faculty.ssn;
+declare variable $studentSsns := $students.ssn;
+
+(: -------  some sample queries  ---------:)
+(: below the entire document is returned, then the sequence of department objects, then the sequence of department codes
+:)
+
+"---- the whole document ----",
+$root,
+"--- sequence of department objects ---",
+$departments,
+"---- sequence of dcodes ----",
+$dcodes,
+
+"---No 1: classes currently offered---",
+for $c in $classes
+return {dcode: $c.dcode, cno: $c.cno},
+
+"---No 2: Where John got an A---",
+for $t in $transcripts
+where every $s in $students[$$.name = "John"] satisfies (($t.ssn = $s.ssn) and ($t.grade = "A"))
+return {dcode: $t.dcode, cno: $t.cno},
+
+"---No 3: courses without prerequisits---",
+for $c in $courses
+where every $p in $prereqs satisfies $p.cno ne $c.cno
+return {dcode: $c.dcode , cno: $c.cno},
+
+"---No 4: CS330 students who have satisfied prereqs---",
+let $enroll330 := distinct-values (
+    for $e in $enrollments
+    where some $c in $classes[$$.cno = 330] satisfies $c.class = $e.class
+    return $e.ssn)
+for $s in $enroll330
+    where every $p in $prereqs[$$.cno = 330] satisfies (
+        some $t in $transcripts[$$.ssn = $s] satisfies $t.cno = $p.pno and (
+         $t.grade ne "D" and $t.grade ne "F"))
+return {ssn: $s},
+
+"---No 5: list all department chairs---",
+for $d in $departments
+return {dname: $d.dname, chairSsn: $d.chair},
+
+"---No 6: students who have at least one A---",
+for $s in $students
+where some $t in $transcripts[$$.ssn = $s.ssn] satisfies $t.grade = "A"
+return {studentSsn: $s.ssn, studentName: $s.name},
+
+"---No 7: students with all A's---",
+for $s in $students
+where every $t in $transcripts[$$.ssn = $s.ssn] satisfies $t.grade = "A"
+return {studentSsn: $s.ssn, studentName: $s.name},
+
+"---No 8: students enrolled without having taken the prereqs---",
+for $s in $students 
+where some $e in $enrollments[$$.ssn = $s.ssn] satisfies (
+    some $c in $classes[$$.class = $e.class] satisfies (
+        some $p in $prereqs[$$.cno = $c.cno] satisfies (
+            every $t in $transcripts[$$.ssn = $s.ssn] satisfies (
+                $t.cno ne $p.pno
+                )
+            )
+        )
+    )
+return {studentSsn: $s.ssn, studentName: $s.name},
+
+"---No 9: classes with at least two students are enrolled---",
+for $c in $classes
+where some $e1 in $enrollments satisfies ($e1.class = $c.class) and
+    (some $e2 in $enrollments satisfies ($e2.class = $c.class) and
+    ($e1.ssn ne $e2.ssn))
+return {class: $c.class, dcode: $c.dcode, cno: $c.cno},
+
+"---No 10: classes with at most two students enrolled---",
+for $c in $classes
+where every $e1 in $enrollments[$$.class = $c.class] satisfies
+    (every $e2 in $enrollments[$$.class = $c.class] satisfies
+    (every $e3 in $enrollments[$$.class = $c.class] satisfies
+    ($e1.ssn = $e2.ssn or
+        $e1.ssn = $e3.ssn or
+            $e2.ssn = $e3.ssn)))
+return {class: $c.class, dcode: $c.dcode, cno: $c.cno},
+
+
+"---No 11: classes with exaclty two students enrolled---",
+for $c in $classes
+where some $e1 in $enrollments satisfies ($e1.class = $c.class) and
+    (some $e2 in $enrollments satisfies ($e2.class = $c.class) and
+    ($e1.ssn ne $e2.ssn) and not(
+        some $e3 in $enrollments satisfies ($e3.class = $c.class) and (
+            $e3.ssn ne $e1.ssn and $e3.ssn ne $e2.ssn)))
+return {class: $c.class, dcode: $c.dcode, cno: $c.cno},
+
+"---No 12: faculty that teach some class outside of their department---",
+for $f in $faculty
+where some $c in $classes[$$.instructor = $f.ssn] satisfies $c.dcode ne $f.dcode
+return {facultySsn: $f.ssn, facultyName: $f.name},
+
+"---No 13: departments with some classes taught by its faculty---",
+for $d in $departments
+where some $c in $classes[$$.dcode = $d.dcode] satisfies (
+    some $f in $faculty[$$.ssn = $c.instructor] satisfies $c.dcode = $f.dcode
+    )
+return {dcode: $d.dcode},
+
+"---No 14 departments with all classes taught by its faculty---",
+for $d in $departments
+where every $c in $classes[$$.dcode = $d.dcode] satisfies (
+    some $f in $faculty[$$.ssn = $c.instructor] satisfies $c.dcode = $f.dcode
+    )
+return {dcode: $d.dcode},
+
+"---TF 1: units for each course are <= 6---",
+every $c in $courses satisfies $c.units le 6,
+
+"---TF 2: everyone enrolled must be a student---",
+every $e in $enrollments satisfies (every $f in $faculty satisfies $f.ssn ne $e.ssn),
+
+"---TF 3: for cno <= 400, the grades can only be A B C D and F---",
+every $t in $transcripts[$$.cno le 400] satisfies ($t.grade eq "A" or ($t.grade eq "B" or (
+    $t.grade eq "C" or ($t.grade eq "D" or $t.grade eq "F")))),
+
+"---TF 4: a teacher must be teaching a class of their department---",
+every $f in $faculty satisfies (
+    every $c in $classes[$$.instructor = $f.ssn] satisfies $c.dcode = $f.dcode
+    ),
+
+"---TF 5: all CS students must be enrolled to Vacation in Hawaii---",
+every $s in $students[$$.major = "CS"] satisfies (
+    every $e in $enrollments[$$.ssn = $s.ssn] satisfies (
+        some $c in $classes[$$.class = $e.class] satisfies (
+            some $r in $courses[$$.cno = $c.cno] satisfies $r.title = "Vacationing in Hawaii"
+            )
+        )
+    ),
+
+"---TF 6: classes 300-499 must have 1 prereq and classes 400-499 must have two---",
+every $c in $classes[$$.cno le 499] satisfies (
+    some $p in $prereqs satisfies $p.cno = $c.cno) and (
+        every $c in $classes[$$.cno ge 400] satisfies (
+            some $p1 in $prereqs satisfies $p1.cno = $c.cno and (
+                some $p2 in $prereqs satisfies $p2.cno = $c.cno and(
+                    $p1.pno ne $p2.pno)))),
+    
+
+
+"---TF 7: enrolled students must have gotten a B or better in the prereqs---",
+every $s in $students satisfies (
+    some $e in $enrollments[$$.ssn = $s.ssn] satisfies (
+        some $p in $prereqs satisfies (
+            some $c in $classes[$$.class = $e.class] satisfies $p.cno = $c.cno) and (
+                every $t in $transcripts[$$.cno = $p.pno] satisfies $t.grade = "A" 
+                or $t.grade = "B"))),
+
+"---TF 8: CS students must only be enrolled in history department classes---",
+every $s in $students[$$.major = "CS"] satisfies (
+    every $e in $enrollments[$$.ssn = $s.ssn] satisfies (
+        every $c in $classes[$$.class = $e.class] satisfies $c.dcode = "HIST"
+        )
+    ),
+
+"---TF 9: department chairs must be part of that department---",
+every $d in $departments satisfies (
+    some $f in $faculty[$$.rank = "chair"] satisfies $f.dcode = $d.dcode
+    )
+
